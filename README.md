@@ -1,79 +1,43 @@
-# Convert GeoJSON to ASCII STL
+# GeoJSON to STL Converter
 
+Este proyecto permite convertir archivos **GeoJSON** a modelos 3D en formato **STL**, listos para impresión 3D o visualización.
 
-### Installation
-```sh
-npm install geojson2stl
-```
+---
 
-### In the terminal
-```sh
-geojson2stl example.geojson
-```
+## 🚀 ¿Para qué sirve?
 
+Transforma estructuras geográficas o modelos definidos en coordenadas en archivos STL. Ideal para:
 
-#### Flags
+- Prototipado rápido.
+- Visualización de datos geoespaciales.
+- Exportaciones desde plataformas de mapeo.
 
--o
---output
+---
 
+## 📦 Estructura del proyecto
 
-Sets the output file path and file name
+. ├── bin/geojson2stl → Script de conversión desde línea de comandos ├── src/index.js → Lógica principal de conversión ├── tests/ → Archivos de prueba (GeoJSON y STL generados) ├── package.json → Configuración de dependencias y scripts
 
-_Default_: ./output.stl
+---
 
+## ✅ Requisitos previos
 
--e
---extrude
+- Tener instalado [Node.js](https://nodejs.org) en tu ordenador.
 
+---
 
-Sets the millimeters to extrude the shape
+## 🛠️ Instalación
 
-_Default_: 1
+```bash
+npm install
+⚙️ Uso
+node bin/geojson2stl tests/test.geojson tests/test.stl
+Cambia tests/test.geojson por el nombre del archivo de entrada.
 
+Cambia tests/test.stl por el nombre del archivo STL que quieres generar.
 
--s
---size
+🧪 Pruebas
 
-
-Set the maximum dimension (in x or y dimensions) of the output shape in millimeters
-
-_Default_:200
-
-
-example
-```
-geojson2stl -s 150 -e 10 -o ./example.stl example.geojson
-```
-returns a 150mm maximum dimension, 10mm extrude file named example.stl
-
-
-### in Node
-```js
-const geojson2stl = require('geojson2stl');
-const fs = require('fs');
-
-fs.readFile('./myFeatures.geojson', 'utf-8', (err,data) => {
-    let options = {};
-    options.size = 150; //150mm maximum width or height
-    options.extrude = 5; //extrude 5mm in z axis
-    let stl = geojson2stl(data, options);
-    ...
-    ...
-});
-```
-
-
-## Reference
-
-geojson2stl(geojson[, options]]) <>
-
-Takes a required parameter of geojson and returns ASCII STL text of the input geojson. Options is an opject with the following optional attributes:
-* ``` output``` - filename to give name attribute in STL file _default_: 'output.stl'
-* ``` extrude``` - a number indicating millimeters to extrude the shape _default_: 1
-* ``` size``` - a number indicating the maximum dimension of the output shape _default_: 200
-
-
-
-## Caveats
-expects geojson as WGS84 (as per the [specification](https://tools.ietf.org/html/rfc7946)) and projects all coordinates to mercator.
+node tests/index-test.js
+📄 Licencia
+MIT © UpToBe Marketing
