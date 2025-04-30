@@ -1,52 +1,41 @@
 #!/usr/bin/env node
 
-var fs = require('fs');
-var commander = require('commander');
-var geojson2stl = require('../');
-var bbox = require('@turf/bbox').default;
-var colors = require('colors');
+const fs = require('fs');
+const path = require('path');
+const commander = require('commander');
+const geojson2stl = require('../');
+const bbox = require('@turf/bbox').default;
+const colors = require('colors');
 
-commander.version(require('../package.json').version)
-    .usage('[options] [file]')
-    .description('Convert a GeoJSON to STL.')
-    .option('-o, --output <path>', 'output file name', './output.stl')
-    .option('-e, --extrude <int>', 'extrude value in mm, default 1mm', 1)
-    .option('-s, --size <int>', 'size in mm, default is 200mm', 200)
+commander
+    .version(require('../package.json').version)
+    .usage('[options] <input.geojson>')
+    .description('🛠️ Convert a GeoJSON file into a 3D STL file for printing or visualization.')
+    .option('-o, --output <path>', 'Output file name (default: ./output.stl)', './output.stl')
+    .option('-e, --extrude <int>', 'Extrude height in mm (default: 1)', parseInt, 1)
+    .option('-s, --size <int>', 'Output model size in mm (default: 200)', parseInt, 200)
     .parse(process.argv);
 
-if (commander.args.length === 0) {
-    console.error();
-    console.error("  error: no input file given");
-    console.error();
-    process.exit(1);
+const inputFile = commander.args[0];
+
+if (!inputFile) {
+    console.error('\n❌ Error: No input file provided.\n'.red);
+    commander.help(); // Muestra ayuda y termina
 }
 
-fs.readFile(commander.args[0], 'utf-8', function(err, data) {
-    var options = {};
-    options.size = parseInt(commander.size)
-    options.extrude = parseInt(commander.extrude);
-    options.output = commander.output;
-    var geojson = JSON.parse(data);
-    var dims = bbox(geojson);
-    var xDiff = dims[2] - dims[0];
-    var yDiff = dims[3] - dims[1];
-    var xDim, yDim;
-    if (xDiff > yDiff) {
-        xDim = options.size;
-        yDim = options.size * yDiff / xDiff;
-    } else if (yDiff > xDiff) {
-        xDim = options.size * xDiff / yDiff;
-        yDim = options.size;
-    } else {
-        xDim = options.size;
-        yDim = options.size;
-    }
-    var stl = geojson2stl(geojson, options);
-    console.log(colors.blue(`output dimensions 📏`));
-    console.log(colors.blue(`x\t${xDim}mm`));
-    console.log(colors.blue(`y\t${yDim}mm`));
-    console.log(colors.blue(`z\t${options.extrude}mm`));
-    fs.writeFile(options.output, stl, () => {
-        console.log(colors.green(`${options.output} written.`));
+try {
+    const data = fs.readFileSync(inputFile, 'utf-8');
+    const geojson = JSON.parse(data);
+
+    const stl = geojson2stl(geojson, {
+        size: commander.size,
+        extrude: commander.extrude,
+        output: commander.output
     });
-});
+
+    fs.writeFileSync(commander.output, stl);
+    console.log(`\n✅ STL file generated successfully: ${commander.output.green}\n`);
+} catch (err) {
+    console.error(`\n❌ An error occurred: ${err.message}\n`.red);
+    process.exit(1);
+}
