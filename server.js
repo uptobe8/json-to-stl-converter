@@ -24,7 +24,7 @@ app.post('/convertir-a-stl', (req, res) => {
       {
         type: 'Feature',
         geometry: {
-          type: 'Polygon',
+          type: 'MultiPolygon',
           coordinates: vector_paths
         }
       }
