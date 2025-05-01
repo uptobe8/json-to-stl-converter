@@ -19,8 +19,16 @@ module.exports = (geojson, options = {}) => {
 
     let facets = '';
     for (let i = 0; i < scaled.features.length; i++) {
-        const feature = scaled.features[i].geometry.coordinates[0];
-        facets += convertFeature(feature, extrude, size);
+        const geom = scaled.features[i].geometry;
+        if (geom.type === 'Polygon') {
+            const feature = geom.coordinates[0];
+            facets += convertFeature(feature, extrude, size);
+        } else if (geom.type === 'MultiPolygon') {
+            geom.coordinates.forEach(polygon => {
+                const feature = polygon[0];
+                facets += convertFeature(feature, extrude, size);
+            });
+        }
     }
 
     const filename = path.parse(output).name;
@@ -35,11 +43,11 @@ const convertFeature = (feature, extrusion, size) => {
     const triangles = earcut(flattened, null, 2);
 
     for (let i = 0; i < triangles.length; i += 3) {
-    const a = pointTo3D(flattened.slice(triangles[i] * 2, triangles[i] * 2 + 2), 0);
-    const b = pointTo3D(flattened.slice(triangles[i + 1] * 2, triangles[i + 1] * 2 + 2), 0);
-    const c = pointTo3D(flattened.slice(triangles[i + 2] * 2, triangles[i + 2] * 2 + 2), 0);
-    stl += triangleToStl(a, b, c);
-}
+        const a = pointTo3D(flattened.slice(triangles[i] * 2, triangles[i] * 2 + 2), 0);
+        const b = pointTo3D(flattened.slice(triangles[i + 1] * 2, triangles[i + 1] * 2 + 2), 0);
+        const c = pointTo3D(flattened.slice(triangles[i + 2] * 2, triangles[i + 2] * 2 + 2), 0);
+        stl += triangleToStl(a, b, c);
+    }
     return stl;
 };
 
