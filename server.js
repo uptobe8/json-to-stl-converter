@@ -11,11 +11,29 @@ app.use(express.json({ limit: '5mb' }));
 
 // Ruta del endpoint
 app.post('/convertir-a-stl', (req, res) => {
-  const { geojson, opciones = {} } = req.body;
+  const { vector_paths, altura_extrusion = 5.0 } = req.body;
 
-  if (!geojson) {
-    return res.status(400).json({ error: 'Falta el parámetro "geojson"' });
+  if (!vector_paths) {
+    return res.status(400).json({ error: 'Falta el parámetro "vector_paths"' });
   }
+
+  // Construir un objeto GeoJSON compatible a partir de vector_paths
+  const geojson = {
+    type: 'FeatureCollection',
+    features: [
+      {
+        type: 'Feature',
+        geometry: {
+          type: 'Polygon',
+          coordinates: vector_paths
+        }
+      }
+    ]
+  };
+
+  const opciones = {
+    extrude: altura_extrusion
+  };
 
   try {
     const stl = geojson2stl(geojson, opciones);
